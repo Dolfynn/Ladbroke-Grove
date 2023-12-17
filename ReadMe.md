@@ -6,7 +6,7 @@ Ladbroke Grove
 
 -Our goal is to add an element of fun and relatability, especially for those who find conventional programming languages daunting or monotonous.
 
--We had a had 2 versions of our programming language, one which was more advanced and complicated, and unfortunately we didn't get to work completely, we didn't have enough time to complete it. So we uploaded our second version which works for for a few sample cases. Please use this one for testing because the other version wasn't completed.
+-We had a had 2 versions of our programming language, one which was more advanced and complicated, and unfortunately we didn't get to work completely, we didn't have enough time to complete it. So we uploaded our second version which is a bit simpler but works for a few sample cases. Please use this one for testing because the other version wasn't completed.
 
 INSTALLATION
 -
