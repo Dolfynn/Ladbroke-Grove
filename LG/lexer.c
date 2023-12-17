@@ -60,8 +60,11 @@ void lex(const char *source, Token *tokens, int *tokenCount) {
                 case '=':
                     tokens[j++] = (Token){TOKEN_EQUALS, "="};
                     break;
-                case ':':
-                    tokens[j++] = (Token){TOKEN_COLON, ":"};
+                case '{':
+                    tokens[j++] = (Token){TOKEN_OPEN_BRACE, "{"};
+                    break;
+                case '}':
+                    tokens[j++] = (Token){TOKEN_CLOSE_BRACE, "}"};
                     break;
                 // Additional cases for other single character tokens
                 default:
@@ -73,3 +76,4 @@ void lex(const char *source, Token *tokens, int *tokenCount) {
     }
     *tokenCount = j;
 }
+
