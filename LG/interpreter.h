@@ -7,6 +7,7 @@ void executeAST(ASTNode *node);
 void executePrintStatement(ASTNode *node);
 void executeVariableDeclaration(ASTNode *node);
 void executeInputStatement(ASTNode *node);
+void executeFunctionCall(ASTNode *node);
 
 
 #endif // EXECUTOR_H
