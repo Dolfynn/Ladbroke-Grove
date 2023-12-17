@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h>
+#include "parser.h"
 // Include other headers as needed
 
 int intVariables[256];  // Array to store integer values of variables
@@ -12,8 +13,9 @@ TokenType variableTypes[256];  // Array to store the type of each variable
 
 void executeAST(ASTNode *node) {
     if (node == NULL) return;
-
+    printf("Starting executeAST\n");
     switch (node->type) {
+        printf("Node type: %d\n", node->type);
         case NODE_TYPE_VARIABLE_DECLARATION:
             executeVariableDeclaration(node);
             break;
@@ -23,6 +25,15 @@ void executeAST(ASTNode *node) {
         case NODE_TYPE_INPUT_STATEMENT:
             executeInputStatement(node);
             break;
+        case NODE_TYPE_FUNCTION_CALL:
+            executeFunctionCall(node);
+            if (node->next != NULL) {
+                printf("Next node type after function call: %d\n", node->next->type);
+            } else {
+                printf("No next node after function call\n");
+            }
+            break;
+
         // Add cases for other node types as needed
         default:
             // Handle other types or error
@@ -33,6 +44,7 @@ void executeAST(ASTNode *node) {
     if (node->next != NULL) {
         executeAST(node->next);
     }
+    printf("Finishing executeAST\n");
 }
 
 void executeVariableDeclaration(ASTNode *node) {
@@ -61,77 +73,65 @@ void executeVariableDeclaration(ASTNode *node) {
 
 
 
-void executeInputStatement(ASTNode *node) {
-    char inputBuffer[256];
-    printf("Enter input: "); // Prompt for input
-    fgets(inputBuffer, sizeof(inputBuffer), stdin);
-
-    // Removing newline character from fgets input
-    inputBuffer[strcspn(inputBuffer, "\n")] = 0;
-
-    // Find the variable in the variable array and store the input
-    for (int i = 0; i < 256; i++) {
-        if (strcmp(variableNames[i], node->data.inputStatement.variableName) == 0) {
-            if (variableTypes[i] == TOKEN_STRING_LITERAL) {
-                strncpy(stringVariables[i], inputBuffer, sizeof(stringVariables[i]));
-            } else if (variableTypes[i] == TOKEN_INT) {
-                intVariables[i] = atoi(inputBuffer);  // Convert string to int if the variable is an integer
-            }
-            return;
-        }
-    }
-
-    fprintf(stderr, "Runtime error: Variable '%s' not found\n", node->data.inputStatement.variableName);
-}
-
-
-
-
 void executePrintStatement(ASTNode *node) {
-    // Check if the argument of the print statement is an expression
     if (node->data.printStatement.argument->type == NODE_TYPE_EXPRESSION) {
-        // Determine the type of the expression
         TokenType exprType = node->data.printStatement.argument->data.expression.expressionType;
 
-        // Handle the case where the expression is an identifier (variable)
         if (exprType == TOKEN_IDENTIFIER) {
-            // Retrieve the name of the variable
-            const char *varName = node->data.printStatement.argument->data.expression.value;
-
-            // Search for the variable in the array of variable names
-            for (int i = 0; i < 256; i++) {
-                // Check if the current variable name matches
-                if (strcmp(variableNames[i], varName) == 0) {
-                    // Print the value of the variable based on its type
-                    switch (variableTypes[i]) {
-                        case TOKEN_INT:
-                            // Print integer value
-                            printf("%d", intVariables[i]);
-                            break;
-                        case TOKEN_STRING_LITERAL:
-                            // Print string value
-                            printf("%s", stringVariables[i]);
-                            break;
-                        // Add other cases for different token types if necessary
-                    }
-                    return; // Exit after printing
+        const char *varName = node->data.printStatement.argument->data.expression.value;
+        for (int i = 0; i < 256; i++) {
+            if (strcmp(variableNames[i], varName) == 0) {
+                if (variableTypes[i] == TOKEN_INT) {
+                    printf("%d", intVariables[i]);
+                } else if (variableTypes[i] == TOKEN_LETTER) {
+                    printf("%s", stringVariables[i]);
                 }
+                return;
             }
-            // If the variable is not found, print an error message
-            printf("Variable '%s' not found\n", varName);
-        } 
-        // Handle the case where the expression is a string literal
-        else if (exprType == TOKEN_STRING_LITERAL) {
-            // Print the string literal directly
+        }
+        } else if (exprType == TOKEN_STRING_LITERAL) {
             printf("%s", node->data.printStatement.argument->data.expression.value);
         }
-        // Add cases to handle other expression types if necessary
     }
 }
 
 
+void executeInputStatement(ASTNode *node) {
+    char input[256];
+    printf("%s", node->data.inputStatement.variableName);
+    if (fgets(input, sizeof(input), stdin) != NULL) {
+        input[strcspn(input, "\n")] = 0;
+
+        int varIndex = -1;
+        for (int i = 0; i < 256; i++) {
+            if (strcmp(variableNames[i], node->data.inputStatement.variableName) == 0) {
+                varIndex = i;
+                break;
+            } else if (variableNames[i][0] == '\0') {
+                strcpy(variableNames[i], node->data.inputStatement.variableName);
+                varIndex = i;
+                break;
+            }
+        }
+
+        if (varIndex != -1) {
+            strcpy(stringVariables[varIndex], input);
+            variableTypes[varIndex] = TOKEN_STRING_LITERAL; // Or appropriate type
+        }
+    }
+}
 
 
+void executeFunctionCall(ASTNode *node) {
+    printf("Starting Function Call: %s\n", node->data.functionCall.functionName);
+    for (int i = 0; i < numFunctionDefinitions; i++) {
+        if (strcmp(functionDefinitions[i]->data.function.name, node->data.functionCall.functionName) == 0) {
+            executeAST(functionDefinitions[i]->data.function.body);
+            break; // Ensure to break after finding and executing the function
+        }
+    }
+    printf("Ending Function Call: %s\n", node->data.functionCall.functionName);
+}
 
 
 
