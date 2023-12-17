@@ -1,0 +1,8 @@
+wagwan greeting {
+	chat-to-man 'enter your name: ' name
+}
+
+greeting
+
+letterting phrase = 'I hope you have a good day'
+waffle phrase
