@@ -3,7 +3,6 @@
 #include "lexer.h"
 #include "parser.h"
 #include "interpreter.h"
-
 #define MAX_SOURCE_CODE_LENGTH 65536
 
 int main() {
@@ -15,7 +14,7 @@ int main() {
     }
 
     // The source file is hardcoded in the program
-    const char *filename = "IDEinput.txt";
+    const char *filename = "source_code.lg";
 
     // Open the source code file
     FILE *file = fopen(filename, "r");
@@ -25,7 +24,6 @@ int main() {
         return 1;
     }
 
-    // Read the source code from the file
     size_t bytesRead = fread(sourceCode, sizeof(char), MAX_SOURCE_CODE_LENGTH - 1, file);
     sourceCode[bytesRead] = '\0'; // Ensure null-termination
     fclose(file);
@@ -38,14 +36,15 @@ int main() {
     // Parse the tokens into an AST
     ASTNode *root = parseProgram(tokens, tokenCount);
 
-    // Execute the AST
-    executeAST(root);
+    printf("Tokens:\n");
+    for (int i = 0; i < tokenCount; i++) {
+        printf("Token %d: Type: %d, Lexeme: '%s'\n", i, tokens[i].type, tokens[i].lexeme);
+    }
+    printf("\nExecuting source code:\n");
 
-    // Free the AST
+    executeAST(root);
     freeAST(root);
 
-    // Free the source code buffer
-    free(sourceCode);
-
+    printf("\n");
     return 0;
 }
