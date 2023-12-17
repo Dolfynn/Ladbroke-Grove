@@ -3,8 +3,12 @@
 #include <string.h>
 #include "lexer.h"
 #include "parser.h"
+#define MAX_FUNCTIONS 256
 
 int currentToken = 0; 
+ASTNode *functionDefinitions[MAX_FUNCTIONS];
+int numFunctionDefinitions = 0;
+
 
 // Function to create a new AST node
 ASTNode *createNode(NodeType type) {
@@ -72,32 +76,55 @@ ASTNode *parseInputStatement(Token *tokens) {
     return node;
 }
 
-
 // Parse a function definition (e.g., "wagwan main():")
-ASTNode *parseFunctionDefinition() {
+ASTNode *parseFunctionDefinition(Token *tokens) {
     ASTNode *node = createNode(NODE_TYPE_FUNCTION);
-    if (match(TOKEN_DEF)) { // 'wagwan'
-        if (match(TOKEN_IDENTIFIER)) { // Function name
-            strncpy(node->data.function.name, tokens[currentToken - 1].lexeme, sizeof(node->data.function.name));
-            if (match(TOKEN_COLON)) { // Start of function body
+    currentToken++;  // Skip 'wagwan'
+    if (tokens[currentToken].type == TOKEN_IDENTIFIER) {
+        strncpy(node->data.function.name, tokens[currentToken].lexeme, sizeof(node->data.function.name));
+        currentToken++;  // Move to the next token
+        if (tokens[currentToken].type == TOKEN_OPEN_BRACE) {
+            currentToken++;  // Skip '{'
+            while (tokens[currentToken].type != TOKEN_CLOSE_BRACE) {
                 // Parse the function body here
-                // This could be a series of statements
-                // For simplicity, let's assume it's a single statement
-                node->data.function.body = parseStatement();
+                // For simplicity, assume it's a single statement
+                node->data.function.body = parseStatement(tokens);
+                currentToken++;
             }
         }
     }
+
+    // Store the function definition in the global list
+    if (numFunctionDefinitions < MAX_FUNCTIONS) {
+        functionDefinitions[numFunctionDefinitions++] = node;
+    }
+
     return node;
 }
 
+
+
+ASTNode *parseFunctionCall(Token *tokens) {
+    ASTNode *node = createNode(NODE_TYPE_FUNCTION_CALL);
+    strncpy(node->data.functionCall.functionName, tokens[currentToken].lexeme, sizeof(node->data.functionCall.functionName));
+    currentToken++;  // Move past the function name
+    return node;
+}
+
+
+
 // Parse a general statement (could be a variable declaration, print statement, etc.)
-ASTNode *parseStatement() {
+ASTNode *parseStatement(Token *tokens) {
     if (tokens[currentToken].type == TOKEN_INT) {
         return parseVariableDeclaration(tokens);
     }if (tokens[currentToken].type == TOKEN_SCANF) {
         return parseInputStatement(tokens);
-    } else if (tokens[currentToken].type == TOKEN_PRINTF) {
+    }if (tokens[currentToken].type == TOKEN_PRINTF) {
         return parsePrintStatement(tokens);
+    }if (tokens[currentToken].type == TOKEN_IDENTIFIER && tokens[currentToken+1].type == TOKEN_OPEN_BRACE) {
+        return parseFunctionDefinition(tokens);
+    } else if (tokens[currentToken].type == TOKEN_IDENTIFIER) {
+        return parseFunctionCall(tokens);
     }
     // Add more cases as needed
     return NULL;
@@ -110,10 +137,9 @@ ASTNode *parseProgram(Token *tokens, int tokenCount) {
 
     while (currentToken < tokenCount && tokens[currentToken].type != TOKEN_UNKNOWN) {
         ASTNode *newNode = NULL;
-
         switch (tokens[currentToken].type) {
             case TOKEN_DEF:
-                newNode = parseFunctionDefinition();
+                newNode = parseFunctionDefinition(tokens);
                 break;
             case TOKEN_PRINTF:
                 newNode = parsePrintStatement(tokens);
@@ -131,11 +157,14 @@ ASTNode *parseProgram(Token *tokens, int tokenCount) {
                 break;
             case TOKEN_NUMBER:
             case TOKEN_IDENTIFIER:
-            case TOKEN_COLON:
+                newNode = parseFunctionCall(tokens);
+                break;
             case TOKEN_NEWLINE:
             case TOKEN_STRING_LITERAL:
             case TOKEN_EQUALS:
             case TOKEN_LETTER:
+            case TOKEN_OPEN_BRACE:
+            case TOKEN_CLOSE_BRACE:
             case TOKEN_UNKNOWN:
                 break;
             // Add more cases for other statements
@@ -173,6 +202,8 @@ void freeAST(ASTNode *node) {
         case NODE_TYPE_EXPRESSION:
             break;
         case NODE_TYPE_INPUT_STATEMENT:
+            break;
+        case NODE_TYPE_FUNCTION_CALL:
             break;
         // ... other cases as needed ...
     }
