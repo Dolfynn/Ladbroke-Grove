@@ -1,0 +1,9 @@
+wagwan greeting {
+	waffle 'good morning '
+}
+
+greeting
+
+letterting name = 'baptiste'
+
+waffle name
