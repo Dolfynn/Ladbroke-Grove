@@ -13,9 +13,7 @@ TokenType variableTypes[256];  // Array to store the type of each variable
 
 void executeAST(ASTNode *node) {
     if (node == NULL) return;
-    printf("Starting executeAST\n");
     switch (node->type) {
-        printf("Node type: %d\n", node->type);
         case NODE_TYPE_VARIABLE_DECLARATION:
             executeVariableDeclaration(node);
             break;
@@ -27,11 +25,6 @@ void executeAST(ASTNode *node) {
             break;
         case NODE_TYPE_FUNCTION_CALL:
             executeFunctionCall(node);
-            if (node->next != NULL) {
-                printf("Next node type after function call: %d\n", node->next->type);
-            } else {
-                printf("No next node after function call\n");
-            }
             break;
 
         // Add cases for other node types as needed
@@ -44,7 +37,6 @@ void executeAST(ASTNode *node) {
     if (node->next != NULL) {
         executeAST(node->next);
     }
-    printf("Finishing executeAST\n");
 }
 
 void executeVariableDeclaration(ASTNode *node) {
@@ -76,7 +68,7 @@ void executeVariableDeclaration(ASTNode *node) {
 void executePrintStatement(ASTNode *node) {
     if (node->data.printStatement.argument->type == NODE_TYPE_EXPRESSION) {
         TokenType exprType = node->data.printStatement.argument->data.expression.expressionType;
-
+        
         if (exprType == TOKEN_IDENTIFIER) {
         const char *varName = node->data.printStatement.argument->data.expression.value;
         for (int i = 0; i < 256; i++) {
@@ -98,9 +90,11 @@ void executePrintStatement(ASTNode *node) {
 
 void executeInputStatement(ASTNode *node) {
     char input[256];
-    printf("%s", node->data.inputStatement.variableName);
+    printf("%s", strlen(node->data.inputStatement.prompt) > 0 ? node->data.inputStatement.prompt : ": ");
+    fflush(stdout);  // Ensure prompt is printed before input
+
     if (fgets(input, sizeof(input), stdin) != NULL) {
-        input[strcspn(input, "\n")] = 0;
+        input[strcspn(input, "\n")] = 0;  // Remove newline character
 
         int varIndex = -1;
         for (int i = 0; i < 256; i++) {
@@ -115,22 +109,30 @@ void executeInputStatement(ASTNode *node) {
         }
 
         if (varIndex != -1) {
-            strcpy(stringVariables[varIndex], input);
-            variableTypes[varIndex] = TOKEN_STRING_LITERAL; // Or appropriate type
+            // Check if the input is a number
+            char *endPtr;
+            long intVal = strtol(input, &endPtr, 10);
+
+            if (*endPtr == '\0') {  // Input was a number
+                intVariables[varIndex] = intVal;
+                variableTypes[varIndex] = TOKEN_INT;
+            } else {  // Input was not a number, so a string
+                strcpy(stringVariables[varIndex], input);
+                variableTypes[varIndex] = TOKEN_LETTER;
+            }
         }
     }
 }
 
 
+
 void executeFunctionCall(ASTNode *node) {
-    printf("Starting Function Call: %s\n", node->data.functionCall.functionName);
     for (int i = 0; i < numFunctionDefinitions; i++) {
         if (strcmp(functionDefinitions[i]->data.function.name, node->data.functionCall.functionName) == 0) {
             executeAST(functionDefinitions[i]->data.function.body);
             break; // Ensure to break after finding and executing the function
         }
     }
-    printf("Ending Function Call: %s\n", node->data.functionCall.functionName);
 }
 
 
