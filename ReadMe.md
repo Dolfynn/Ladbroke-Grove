@@ -35,5 +35,5 @@ To run code
 
 --Code output should display--
 
-5-To rerun new code simply type 'IDE' again in the same window
+5-To rerun new code simply type step 4 again in the same window
 
