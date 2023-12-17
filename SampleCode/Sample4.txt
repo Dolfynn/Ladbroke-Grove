@@ -1,0 +1,6 @@
+wagwan goodMorning {
+	waffle 'good morning'
+}
+
+letterting x = 'the function isn't called'
+waffle x
