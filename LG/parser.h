@@ -36,6 +36,7 @@ typedef struct ASTNode {
         } expression;
         struct {
             char variableName[256];  // Variable to store the input
+            char prompt[256];
         } inputStatement;
         struct {
             char functionName[256]; // Function name for invocation
