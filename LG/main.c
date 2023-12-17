@@ -36,10 +36,10 @@ int main() {
     // Parse the tokens into an AST
     ASTNode *root = parseProgram(tokens, tokenCount);
 
-    printf("Tokens:\n");
-    for (int i = 0; i < tokenCount; i++) {
-        printf("Token %d: Type: %d, Lexeme: '%s'\n", i, tokens[i].type, tokens[i].lexeme);
-    }
+    //printf("Tokens:\n");
+    //for (int i = 0; i < tokenCount; i++) {
+    //    printf("Token %d: Type: %d, Lexeme: '%s'\n", i, tokens[i].type, tokens[i].lexeme);
+    //}
     printf("\nExecuting source code:\n");
 
     executeAST(root);
