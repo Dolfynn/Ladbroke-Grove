@@ -1,1 +1,4 @@
-
+wagwan greeting{
+  waffle 'Hello'
+}
+greeting
