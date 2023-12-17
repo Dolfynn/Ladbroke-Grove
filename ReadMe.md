@@ -23,15 +23,15 @@ To write code
 
 To run code
 -
-1-Open CMD
+1-Open CMD/Terminal
 
 2-Go to the LadbrokeGrove Folder path
 
-3-Type gcc -o IDE IDE.c parser.c lexer.c interpreter.c -I.
+3-Type gcc -o main main.c parser.c lexer.c interpreter.c -I.
 
-4-FOR WINDOWS: Type IDE
+4-FOR WINDOWS: Type main
 
-4-FOR MAC: Type ./IDE
+4-FOR MAC: Type ./main
 
 --Code output should display--
 
