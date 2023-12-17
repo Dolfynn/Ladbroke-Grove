@@ -68,29 +68,57 @@ ASTNode *parsePrintStatement(Token *tokens) {
 
 ASTNode *parseInputStatement(Token *tokens) {
     ASTNode *node = createNode(NODE_TYPE_INPUT_STATEMENT);
-    // Assume the next token is the variable name
-    currentToken++;  // Skip 'chat_to_man'
+    currentToken++;  // Skip 'chat-to-man'
+
+    // Check if next token is a string literal (prompt)
+    if (tokens[currentToken].type == TOKEN_STRING_LITERAL) {
+        strncpy(node->data.inputStatement.prompt, tokens[currentToken].lexeme, sizeof(node->data.inputStatement.prompt));
+    } else {
+        strcpy(node->data.inputStatement.prompt, "");  // No prompt provided
+    }
+
+    // Check for the variable name
+    currentToken++;
     if (tokens[currentToken].type == TOKEN_IDENTIFIER) {
         strncpy(node->data.inputStatement.variableName, tokens[currentToken].lexeme, sizeof(node->data.inputStatement.variableName));
     }
+
     return node;
 }
+
 
 // Parse a function definition (e.g., "wagwan main():")
 ASTNode *parseFunctionDefinition(Token *tokens) {
     ASTNode *node = createNode(NODE_TYPE_FUNCTION);
     currentToken++;  // Skip 'wagwan'
+
     if (tokens[currentToken].type == TOKEN_IDENTIFIER) {
         strncpy(node->data.function.name, tokens[currentToken].lexeme, sizeof(node->data.function.name));
         currentToken++;  // Move to the next token
+
         if (tokens[currentToken].type == TOKEN_OPEN_BRACE) {
             currentToken++;  // Skip '{'
-            while (tokens[currentToken].type != TOKEN_CLOSE_BRACE) {
-                // Parse the function body here
-                // For simplicity, assume it's a single statement
-                node->data.function.body = parseStatement(tokens);
-                currentToken++;
+
+            ASTNode *firstStatement = NULL;
+            ASTNode *lastStatement = NULL;
+
+            while (tokens[currentToken].type != TOKEN_CLOSE_BRACE && tokens[currentToken].type != TOKEN_UNKNOWN) {
+                ASTNode *statement = parseStatement(tokens);
+                if (statement != NULL) {
+                    if (firstStatement == NULL) {
+                        firstStatement = statement;  // This is the first statement in the function body
+                    } else {
+                        lastStatement->next = statement;  // Link this statement to the previous one
+                    }
+                    lastStatement = statement;  // Update the last statement to the current one
+                }
+
+                // Advance to the next token, skipping any newlines or other non-relevant tokens
+                while (tokens[currentToken].type != TOKEN_CLOSE_BRACE && tokens[currentToken].type != TOKEN_NEWLINE && tokens[currentToken].type != TOKEN_UNKNOWN) {
+                    currentToken++;
+                }
             }
+            node->data.function.body = firstStatement;  // Set the body of the function
         }
     }
 
@@ -104,10 +132,10 @@ ASTNode *parseFunctionDefinition(Token *tokens) {
 
 
 
+
 ASTNode *parseFunctionCall(Token *tokens) {
     ASTNode *node = createNode(NODE_TYPE_FUNCTION_CALL);
     strncpy(node->data.functionCall.functionName, tokens[currentToken].lexeme, sizeof(node->data.functionCall.functionName));
-    currentToken++;  // Move past the function name
     return node;
 }
 
