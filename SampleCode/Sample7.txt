@@ -1,0 +1,8 @@
+add maybe one more like this:wagwan information{
+	chat-to-man 'Name: ' name
+	chat-to-man 'Age: ' age
+	waffle name
+	waffle age	
+}
+
+information
