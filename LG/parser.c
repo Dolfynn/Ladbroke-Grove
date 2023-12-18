@@ -102,7 +102,7 @@ ASTNode *parseFunctionDefinition(Token *tokens) {
             ASTNode *firstStatement = NULL;
             ASTNode *lastStatement = NULL;
 
-            while (tokens[currentToken].type != TOKEN_CLOSE_BRACE && tokens[currentToken].type != TOKEN_UNKNOWN) {
+            while (tokens[currentToken].type != TOKEN_CLOSE_BRACE) {
                 ASTNode *statement = parseStatement(tokens);
                 if (statement != NULL) {
                     if (firstStatement == NULL) {
@@ -112,11 +112,7 @@ ASTNode *parseFunctionDefinition(Token *tokens) {
                     }
                     lastStatement = statement;  // Update the last statement to the current one
                 }
-
-                // Advance to the next token, skipping any newlines or other non-relevant tokens
-                while (tokens[currentToken].type != TOKEN_CLOSE_BRACE && tokens[currentToken].type != TOKEN_NEWLINE && tokens[currentToken].type != TOKEN_UNKNOWN) {
-                    currentToken++;
-                }
+                currentToken++;
             }
             node->data.function.body = firstStatement;  // Set the body of the function
         }
@@ -242,4 +238,5 @@ void freeAST(ASTNode *node) {
 
     free(node); // Free the node itself
 }
+
 
