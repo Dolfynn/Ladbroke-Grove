@@ -74,15 +74,15 @@ void executePrintStatement(ASTNode *node) {
         for (int i = 0; i < 256; i++) {
             if (strcmp(variableNames[i], varName) == 0) {
                 if (variableTypes[i] == TOKEN_INT) {
-                    printf("%d", intVariables[i]);
+                    printf("%d\n", intVariables[i]);
                 } else if (variableTypes[i] == TOKEN_LETTER) {
-                    printf("%s", stringVariables[i]);
+                    printf("%s\n", stringVariables[i]);
                 }
                 return;
             }
         }
         } else if (exprType == TOKEN_STRING_LITERAL) {
-            printf("%s", node->data.printStatement.argument->data.expression.value);
+            printf("%s\n", node->data.printStatement.argument->data.expression.value);
         }
     }
 }
